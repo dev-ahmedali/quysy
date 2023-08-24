@@ -4,20 +4,22 @@ import { QuizCreationSchema } from "@/schemas/form/quiz";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
+
 // POST -> api/question
 export const POST = async (req: Request, res: Response) => {
-  const session = await getAuthSession();
-  if (!session?.user) {
-    return NextResponse.json(
-      {
-        error: "You must be logged in to create a questions",
-      },
-      {
-        status: 401,
-      },
-    );
-  }
   try {
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return NextResponse.json(
+        {
+          error: "You must be logged in to create a questions",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
     const body = await req.json();
     const { amount, type, topic } = QuizCreationSchema.parse(body);
     let questions: any;

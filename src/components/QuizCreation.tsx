@@ -24,16 +24,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { BookOpen, CopyCheck } from "lucide-react";
 import { Separator } from "./ui/separator";
-import { type } from "os";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 type Props = {};
 
 type Input = z.infer<typeof QuizCreationSchema>;
 
-const QuizCreation = (props: Props) => {
-  const {mutate: getQuestions, isLoading} = useMutation({
+const QuizCreation = (props :Props) => {
+  const router = useRouter();
+  const { mutate: getQuestions, isLoading } = useMutation({
     mutationFn: async ({ amount, topic, type }: Input) => {
       const response = await axios.post("/api/game", {
         amount,
@@ -54,13 +55,22 @@ const QuizCreation = (props: Props) => {
   });
 
   function onSubmit(input: Input) {
-   getQuestions({
-    amount: input.amount,
-    topic: input.topic,
-    type: input.type
-   }, {
-    onSuccess: () => {}
-   })
+    getQuestions(
+      {
+        amount: input.amount,
+        topic: input.topic,
+        type: input.type,
+      },
+      {
+        onSuccess: ({ gameId }) => {
+          if (form.getValues("type") === "open_ended") {
+            router.push(`/play/open-ended/${gameId}`);
+          } else {
+            router.push(`/play/mcq/${gameId}`);
+          }
+        },
+      },
+    );
   }
 
   form.watch();
@@ -136,10 +146,10 @@ const QuizCreation = (props: Props) => {
                       ? "default"
                       : "secondary"
                   }>
-                  <BookOpen className="mr-2 w-4 h-4" /> Open embed
+                  <BookOpen className="mr-2 w-4 h-4" /> Open ended
                 </Button>
               </div>
-              <Button type="submit">Submit</Button>
+              <Button disabled={isLoading} type="submit">Submit</Button>
             </form>
           </Form>
         </CardContent>
