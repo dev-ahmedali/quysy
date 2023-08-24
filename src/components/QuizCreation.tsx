@@ -25,12 +25,25 @@ import { Input } from "@/components/ui/input";
 import { BookOpen, CopyCheck } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { type } from "os";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 type Props = {};
 
 type Input = z.infer<typeof QuizCreationSchema>;
 
 const QuizCreation = (props: Props) => {
+  const {mutate: getQuestions, isLoading} = useMutation({
+    mutationFn: async ({ amount, topic, type }: Input) => {
+      const response = await axios.post("/api/game", {
+        amount,
+        type,
+        topic,
+      });
+      return response.data;
+    },
+  });
+
   const form = useForm<Input>({
     resolver: zodResolver(QuizCreationSchema),
     defaultValues: {
@@ -41,10 +54,16 @@ const QuizCreation = (props: Props) => {
   });
 
   function onSubmit(input: Input) {
-    alert(JSON.stringify(input, null, 2));
+   getQuestions({
+    amount: input.amount,
+    topic: input.topic,
+    type: input.type
+   }, {
+    onSuccess: () => {}
+   })
   }
 
-  form.watch()
+  form.watch();
 
   return (
     <div className="absolute top-1/2 -translate-x-1/2 left-1/2 -translate-y-1/2">
@@ -94,24 +113,23 @@ const QuizCreation = (props: Props) => {
               />
               <div className="flex justify-between">
                 <Button
-                type="button"
+                  type="button"
                   className="w-1/2 rounded-none rounded-l-lg"
                   variant={
                     form.getValues("type") === "mcq" ? "default" : "secondary"
                   }
                   onClick={() => {
-                    form.setValue("type", "mcq")
-                  }}
-                  >
+                    form.setValue("type", "mcq");
+                  }}>
                   <CopyCheck className="mr-2 w-4 h-4" />
                   Multiple Choices
                 </Button>
                 <Separator orientation="vertical" />
                 <Button
-                 type="button"
-                onClick={() => {
-                  form.setValue("type", "open_ended")
-                }}
+                  type="button"
+                  onClick={() => {
+                    form.setValue("type", "open_ended");
+                  }}
                   className="w-1/2 rounded-none rounded-r-lg"
                   variant={
                     form.getValues("type") === "open_ended"
