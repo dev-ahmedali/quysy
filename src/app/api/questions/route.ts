@@ -4,21 +4,20 @@ import { QuizCreationSchema } from "@/schemas/form/quiz";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
-
 // POST -> api/question
 export const POST = async (req: Request, res: Response) => {
   try {
-    const session = await getAuthSession();
-    if (!session?.user) {
-      return NextResponse.json(
-        {
-          error: "You must be logged in to create a questions",
-        },
-        {
-          status: 401,
-        },
-      );
-    }
+    // const session = await getAuthSession();
+    // if (!session?.user) {
+    //   return NextResponse.json(
+    //     {
+    //       error: "You must be logged in to create a questions",
+    //     },
+    //     {
+    //       status: 401,
+    //     },
+    //   );
+    // }
 
     const body = await req.json();
     const { amount, type, topic } = QuizCreationSchema.parse(body);
@@ -29,7 +28,6 @@ export const POST = async (req: Request, res: Response) => {
         new Array(amount).fill(
           `you are to generate a random hard open ended questions about ${topic}`,
         ),
-
         {
           question: "question",
           answer: "answer with max length of 15 words",
